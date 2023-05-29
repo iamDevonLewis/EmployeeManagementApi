@@ -23,102 +23,82 @@ namespace EmployeeManagementAPI.Controllers
 
         // GET: api/Employees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public IActionResult GetEmployees()
         {
           if (_context.Employees == null)
           {
               return NotFound();
           }
-            return await _context.Employees.ToListAsync();
+            var employees = _context.Employees.ToList();
+            return Ok(employees);
         }
 
         // GET: api/Employees/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Employee>> GetEmployee(int id)
+        public IActionResult GetEmployee(int id)
         {
-          if (_context.Employees == null)
-          {
-              return NotFound();
-          }
-            var employee = await _context.Employees.FindAsync(id);
+          
+            var employee =_context.Employees.Find(id);
 
             if (employee == null)
             {
                 return NotFound();
             }
 
-            return employee;
-        }
-
-        // PUT: api/Employees/5
-        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(int id, Employee employee)
-        {
-            if (id != employee.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(employee).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EmployeeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(employee);
         }
 
         // POST: api/Employees
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public IActionResult Create(Employee employee)
         {
-          if (_context.Employees == null)
-          {
-              return Problem("Entity set 'ApplicationDbContext.Employees'  is null.");
-          }
             _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+            _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
         }
 
-        // DELETE: api/Employees/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployee(int id)
+
+        // PUT: api/Employees/5
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateEmployee(int id, Employee employee)
         {
-            if (_context.Employees == null)
+            var existingEmployee = _context.Employees.Include(e => e.Address).FirstOrDefault(e => e.Id == id);
+
+
+            if (employee == null)
             {
                 return NotFound();
             }
-            var employee = await _context.Employees.FindAsync(id);
+
+            // Update the employee properties
+            existingEmployee.FirstName = employee.FirstName;
+            existingEmployee.LastName = employee.LastName;
+            existingEmployee.Department = employee.Department;
+            existingEmployee.Address = employee.Address;
+            // Update other properties as needed
+
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        // DELETE: api/Employees/5
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+           
+            var employee = _context.Employees.Find(id);
             if (employee == null)
             {
                 return NotFound();
             }
 
             _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool EmployeeExists(int id)
-        {
-            return (_context.Employees?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
