@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeManagementAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230529171145_InitialMigration")]
+    [Migration("20230530214327_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -45,24 +45,6 @@ namespace EmployeeManagementAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Addresses");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            City = "Saint Louis",
-                            State = "Missouri",
-                            Street = "8026 Martin Blvd",
-                            Zipcode = 63301
-                        },
-                        new
-                        {
-                            Id = 2,
-                            City = "Miami",
-                            State = "Florida",
-                            Street = "1916 Miami Gardens",
-                            Zipcode = 33169
-                        });
                 });
 
             modelBuilder.Entity("EmployeeManagementAPI.Models.Employee", b =>
@@ -88,34 +70,17 @@ namespace EmployeeManagementAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddressId");
+                    b.HasIndex("AddressId")
+                        .IsUnique();
 
                     b.ToTable("Employees");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AddressId = 1,
-                            Department = "IT",
-                            FirstName = "Chris",
-                            LastName = "Davis"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AddressId = 2,
-                            Department = "Accounting",
-                            FirstName = "John",
-                            LastName = "Smith"
-                        });
                 });
 
             modelBuilder.Entity("EmployeeManagementAPI.Models.Employee", b =>
                 {
                     b.HasOne("EmployeeManagementAPI.Models.Address", "Address")
-                        .WithMany()
-                        .HasForeignKey("AddressId")
+                        .WithOne()
+                        .HasForeignKey("EmployeeManagementAPI.Models.Employee", "AddressId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

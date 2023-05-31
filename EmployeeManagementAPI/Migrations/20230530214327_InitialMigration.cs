@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace EmployeeManagementAPI.Migrations
 {
     /// <inheritdoc />
@@ -62,28 +60,11 @@ namespace EmployeeManagementAPI.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.InsertData(
-                table: "Addresses",
-                columns: new[] { "Id", "City", "State", "Street", "Zipcode" },
-                values: new object[,]
-                {
-                    { 1, "Saint Louis", "Missouri", "8026 Martin Blvd", 63301 },
-                    { 2, "Miami", "Florida", "1916 Miami Gardens", 33169 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Employees",
-                columns: new[] { "Id", "AddressId", "Department", "FirstName", "LastName" },
-                values: new object[,]
-                {
-                    { 1, 1, "IT", "Chris", "Davis" },
-                    { 2, 2, "Accounting", "John", "Smith" }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_AddressId",
                 table: "Employees",
-                column: "AddressId");
+                column: "AddressId",
+                unique: true);
         }
 
         /// <inheritdoc />

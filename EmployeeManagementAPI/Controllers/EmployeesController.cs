@@ -29,7 +29,7 @@ namespace EmployeeManagementAPI.Controllers
           {
               return NotFound();
           }
-            var employees = _context.Employees.ToList();
+            var employees = _context.Employees.Include(x => x.Address).ToList();
             return Ok(employees);
         }
 
@@ -38,7 +38,7 @@ namespace EmployeeManagementAPI.Controllers
         public IActionResult GetEmployee(int id)
         {
           
-            var employee =_context.Employees.Find(id);
+            var employee =_context.Employees.Include(x => x.Address).FirstOrDefault(j => j.Id == id);
 
             if (employee == null)
             {
@@ -53,7 +53,7 @@ namespace EmployeeManagementAPI.Controllers
         public IActionResult Create(Employee employee)
         {
             _context.Employees.Add(employee);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
         }
@@ -62,12 +62,12 @@ namespace EmployeeManagementAPI.Controllers
         // PUT: api/Employees/5
 
         [HttpPut("{id}")]
-        public IActionResult UpdateEmployee(int id, Employee employee)
+        public IActionResult UpdateEmployee(int id,Employee employee)
         {
             var existingEmployee = _context.Employees.Include(e => e.Address).FirstOrDefault(e => e.Id == id);
 
 
-            if (employee == null)
+            if (existingEmployee == null)
             {
                 return NotFound();
             }
@@ -76,24 +76,31 @@ namespace EmployeeManagementAPI.Controllers
             existingEmployee.FirstName = employee.FirstName;
             existingEmployee.LastName = employee.LastName;
             existingEmployee.Department = employee.Department;
-            existingEmployee.Address = employee.Address;
-            // Update other properties as needed
 
+            //detach address
+            //_context.Entry(existingEmployee.Address).State = EntityState.Detached;
+            existingEmployee.Address.City = employee.Address.City;
+            existingEmployee.Address.State = employee.Address.State;
+            existingEmployee.Address.Street = employee.Address.Street;
+            existingEmployee.Address.Zipcode = employee.Address.Zipcode;
+            // Update other properties as needed
             _context.SaveChanges();
 
-            return NoContent();
+            return Ok(existingEmployee);
         }
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-           
-            var employee = _context.Employees.Find(id);
+
+            var employee = _context.Employees.Include(x => x.Address).FirstOrDefault(x => x.Id == id);
             if (employee == null)
             {
                 return NotFound();
             }
+
+            _context.Remove(employee.Address);
 
             _context.Employees.Remove(employee);
             _context.SaveChangesAsync();
